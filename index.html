@@ -374,17 +374,27 @@
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
 
-    function createNamesColumn() {
-      const namesColumn = document.getElementById("names-column");
-      namesColumn.innerHTML = "";
-      employees.forEach((employee) => {
-        const nameDiv = document.createElement("div");
-        nameDiv.classList.add("name");
-        nameDiv.textContent = employee;
-        nameDiv.onclick = () => openPopup(employee);
-        namesColumn.appendChild(nameDiv);
-      });
-    }
+	 function createNamesColumn() {
+	  const namesColumn = document.getElementById("names-column");
+	  namesColumn.innerHTML = "";
+	  employees.forEach((employee) => {
+		const nameDiv = document.createElement("div");
+		nameDiv.classList.add("name");
+
+		// Pisah nama menjadi dua bagian
+		const nameParts = employee.split(" ");
+		if (nameParts.length > 1) {
+		  const firstLine = nameParts[0];
+		  const secondLine = nameParts.slice(1).join(" ");
+		  nameDiv.innerHTML = `${firstLine}<br>${secondLine}`;
+		} else {
+		  nameDiv.textContent = employee;
+		}
+
+		nameDiv.onclick = () => openPopup(employee);
+		namesColumn.appendChild(nameDiv);
+	  });
+	}
 
     function createDaysColumn() {
       const daysColumn = document.getElementById("days-column");
