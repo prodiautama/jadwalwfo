@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jadwal WFO - Prodia Utama</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #eef2f3, #dbe9f4);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    .calendar-container {
+      background-color: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-header h2 {
+      font-size: 32px;
+      color: #1e2a38;
+      font-weight: 600;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 30px;
+    }
+
+    .names-column {
+      background-color: #f9fbfc;
+      border: 1px solid #e0e6ed;
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .names-column .name {
+      background-color: #0077cc;
+      color: #fff;
+      padding: 12px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 500;
+    }
+
+    .names-column .name:hover {
+      background-color: #005fa3;
+    }
+
+    .days-column {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .day {
+      background-color: #ffffff;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: 0.3s;
+    }
+
+    .day:hover {
+      background-color: #f4f9ff;
+    }
+
+    .day strong {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .day span {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .employee {
+      background-color: #28a745;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .employee:hover {
+      background-color: #218838;
+    }
+
+    .remove {
+      margin-left: 10px;
+      color: #f8d7da;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .download-btn {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background-color: #28a745;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .download-btn:hover {
+      background-color: #218838;
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease-out;
+      z-index: 999;
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.4s ease-out;
+    }
+
+    .popup-header {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .popup-body label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    .popup-body input[type="checkbox"] {
+      margin-right: 12px;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .popup-buttons button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .popup-buttons .cancel {
+      background-color: #dc3545;
+    }
+
+    .popup-buttons .cancel:hover {
+      background-color: #c82333;
+    }
+
+    .popup-buttons button:not(.cancel) {
+      background-color: #0077cc;
+    }
+
+    .popup-buttons button:not(.cancel):hover {
+      background-color: #005fa3;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+	  body {
+		padding: 20px;
+	  }
+
+	  .calendar-header h2 {
+		font-size: 20px;
+		text-align: center;
+		width: 100%;
+	  }
+
+	  .calendar {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	  }
+
+	  .names-column {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 10px;
+		padding: 15px;
+		justify-content: center;
+	  }
+
+	  .names-column .name {
+		flex: 1 1 45%;
+		font-size: 16px;
+		padding: 10px;
+	  }
+
+	  .days-column {
+		grid-template-columns: 1fr;
+		gap: 15px;
+	  }
+
+	  .day {
+		padding: 12px;
+		gap: 8px;
+	  }
+
+	  .popup-content {
+		padding: 20px;
+	  }
+
+	  .popup-buttons {
+		flex-direction: column;
+		gap: 10px;
+	  }
+
+	  .popup-buttons button {
+		margin: 0;
+	  }
+	}
+  </style>
+<!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <h2>Jadwal WFO Prodia Utama</h2>
+    </div>
+
+    <div class="calendar">
+      <div class="names-column" id="names-column"></div>
+      <div class="days-column" id="days-column"></div>
+    </div>
+
+    <div>
+      <button class="download-btn" onclick="downloadLog()">Download Log</button>
+    </div>
+  </div>
+
+  <!-- Popups (same as before) -->
+  <!-- Tanggal -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <div class="popup-header">Pilih Tanggal WFO</div>
+      <div class="popup-body">
+        <div id="popup-dates"></div>
+      </div>
+      <div class="popup-buttons">
+        <button class="cancel" onclick="closePopup()">Batal</button>
+        <button onclick="saveSelectedDates()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div class="popup" id="pin-popup">
+    <div class="popup-content">
+      <div class="popup-header">Masukkan PIN untuk Download</div>
+      <div class="popup-body">
+        <input type="password" id="pin-input" placeholder="6 Digit PIN" maxlength="6" style="width: 100%; padding: 10px; font-size: 16px; text-align: center;">
+        <div id="pin-error" style="color: red; text-align: center; margin-top: 10px; display: none;">PIN salah. Coba lagi.</div>
+      </div>
+      <div class="popup-buttons">
+        <button class="cancel" onclick="closePinPopup()">Batal</button>
+        <button onclick="verifyPin()">Verifikasi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyBD50qAIbKWTKtOhLxsWRUluUN5wZzxIAI",
+      authDomain: "test-ffdca.firebaseapp.com",
+      databaseURL: "https://test-ffdca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "test-ffdca",
+      storageBucket: "test-ffdca.appspot.com",
+      messagingSenderId: "1040515165795",
+      appId: "1:1040515165795:web:54975bed2e47a1af389256",
+      measurementId: "G-7LJB5873M5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const weekdays = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+    const employees = ["Dina Kharisma", "Yudy Pandjaitan", "Victor Pasaribu", "Fitri Rahmawati", "Riska Julia", "Ary Tryjuniarti", "Hafizat Intan", "Veni Wijaya", "Dinda Aisyah"];
+    let schedule = {};
+    let selectedEmployee = null;
+
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+
+    function createNamesColumn() {
+      const namesColumn = document.getElementById("names-column");
+      namesColumn.innerHTML = "";
+      employees.forEach((employee) => {
+        const nameDiv = document.createElement("div");
+        nameDiv.classList.add("name");
+        nameDiv.textContent = employee;
+        nameDiv.onclick = () => openPopup(employee);
+        namesColumn.appendChild(nameDiv);
+      });
+    }
+
+    function createDaysColumn() {
+      const daysColumn = document.getElementById("days-column");
+	  daysColumn.innerHTML = "";
+
+	  weekdays.forEach((day, index) => {
+		const date = new Date(startOfWeek);
+		date.setDate(date.getDate() + index);
+		const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+
+		const dayDiv = document.createElement("div");
+		dayDiv.classList.add("day");
+		dayDiv.dataset.day = day;
+		dayDiv.innerHTML = `<strong>${day}</strong><br><span>${formattedDate}</span>`;
+
+		let count = 0;
+
+		if (schedule[day]) {
+		  schedule[day].forEach((employee) => {
+			const employeeDiv = document.createElement("div");
+			employeeDiv.classList.add("employee");
+			employeeDiv.textContent = employee;
+			employeeDiv.innerHTML += `<span class="remove" onclick="removeEmployeeFromDay(event)">X</span>`;
+			dayDiv.appendChild(employeeDiv);
+			count++;
+		  });
+		}
+
+		// Tambahkan counter di bawah semua nama
+		const counter = document.createElement("div");
+		counter.style.marginTop = "10px";
+		counter.style.fontWeight = "bold";
+		counter.style.color = "#444";
+		counter.textContent = `Total: ${count} orang`;
+		dayDiv.appendChild(counter);
+
+		daysColumn.appendChild(dayDiv);
+	  });
+    }
+
+    function openPopup(employee) {
+      selectedEmployee = employee;
+      const popupDates = document.getElementById("popup-dates");
+      popupDates.innerHTML = "";
+
+      weekdays.forEach((day, index) => {
+        const date = new Date(startOfWeek);
+        date.setDate(date.getDate() + index);
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+
+        const dateLabel = document.createElement("label");
+        const dateCheckbox = document.createElement("input");
+        dateCheckbox.type = "checkbox";
+        dateCheckbox.dataset.day = day;
+        dateCheckbox.checked = schedule[day] && schedule[day].includes(employee);
+
+        dateLabel.appendChild(dateCheckbox);
+        dateLabel.appendChild(document.createTextNode(formattedDate));
+        popupDates.appendChild(dateLabel);
+        popupDates.appendChild(document.createElement("br"));
+      });
+
+      document.getElementById("popup").style.display = "flex";
+    }
+
+    function saveSelectedDates() {
+      const selectedDates = [];
+      const checkboxes = document.querySelectorAll("#popup-dates input[type='checkbox']:checked");
+      checkboxes.forEach((checkbox) => selectedDates.push(checkbox.dataset.day));
+
+      weekdays.forEach((day) => {
+        if (!schedule[day]) schedule[day] = [];
+        if (selectedDates.includes(day) && !schedule[day].includes(selectedEmployee)) {
+          schedule[day].push(selectedEmployee);
+        } else if (!selectedDates.includes(day) && schedule[day].includes(selectedEmployee)) {
+          schedule[day] = schedule[day].filter((e) => e !== selectedEmployee);
+        }
+      });
+
+      saveSchedule();
+      closePopup();
+      loadSchedule(); // refresh jadwal
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function saveSchedule() {
+      db.ref("schedule").set(schedule);
+    }
+
+    function removeEmployeeFromDay(event) {
+      const employeeDiv = event.target.parentElement;
+      const dayDiv = employeeDiv.closest(".day");
+      const day = dayDiv.dataset.day;
+      const employee = employeeDiv.textContent.replace("X", "").trim();
+
+      schedule[day] = schedule[day].filter((e) => e !== employee);
+      saveSchedule();
+      employeeDiv.remove();
+    }
+
+    function downloadLog() {
+      openPinPopup();
+    }
+
+    function openPinPopup() {
+      document.getElementById("pin-input").value = "";
+      document.getElementById("pin-error").style.display = "none";
+      document.getElementById("pin-popup").style.display = "flex";
+    }
+
+    function closePinPopup() {
+      document.getElementById("pin-popup").style.display = "none";
+    }
+
+    function verifyPin() {
+      const pin = document.getElementById("pin-input").value;
+      const correctPin = "123456";
+
+      if (pin === correctPin) {
+        closePinPopup();
+        downloadAndClearLog();
+      } else {
+        document.getElementById("pin-error").style.display = "block";
+      }
+    }
+
+    function downloadAndClearLog() {
+      const log = ["Jadwal Karyawan WFO"];
+      weekdays.forEach((day, index) => {
+        if (schedule[day] && schedule[day].length > 0) {
+          const date = new Date(startOfWeek);
+          date.setDate(date.getDate() + index);
+          const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+          log.push(`${day}, ${formattedDate}: ${schedule[day].join(", ")}`);
+        }
+      });
+
+      const blob = new Blob([log.join("\n")], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Jadwal_Karyawan_WFO.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      weekdays.forEach((day) => {
+        schedule[day] = [];
+      });
+
+      saveSchedule();
+      loadSchedule();
+    }
+
+    async function loadSchedule() {
+      const snapshot = await db.ref("schedule").once("value");
+      schedule = snapshot.val() || {};
+      createDaysColumn();
+    }
+
+    // Initialize
+    createNamesColumn();
+    loadSchedule();
+  </script>
+
+</body>
+</html>
