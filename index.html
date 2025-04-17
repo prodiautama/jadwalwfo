@@ -136,7 +136,7 @@
       margin-top: 30px;
       width: 100%;
       padding: 14px;
-      background-color: #28a745;
+      background-color: #27AE60;
       border: none;
       color: #fff;
       font-size: 16px;
@@ -298,6 +298,49 @@
 		margin: 0;
 	  }
 	}
+	
+	.employee.legal {
+	  background-color: #F1C40F; /* kuning */
+	}
+
+	.employee.finance {
+	  background-color: #3498DB; /* biru */
+	}
+
+	.employee.it {
+	  background-color: #2ECC71; /* hijau */
+	}
+
+	.name.legal,
+	.employee.legal {
+	  background-color: #f4b400;
+	}
+
+	.name.finance,
+	.employee.finance {
+	  background-color: #0077cc;
+	}
+
+	.name.it,
+	.employee.it {
+	  background-color: #28a745;
+	}
+
+	.name.legal:hover,
+	.employee.legal:hover {
+	  background-color: #d79d00;
+	}
+
+	.name.finance:hover,
+	.employee.finance:hover {
+	  background-color: #005fa3;
+	}
+
+	.name.it:hover,
+	.employee.it:hover {
+	  background-color: #218838;
+	}
+
   </style>
 <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -367,21 +410,47 @@
     const db = firebase.database();
 
     const weekdays = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
-    const employees = ["Dina Kharisma", "Yudy Pandjaitan", "Victor Pasaribu", "Fitri Rahmawati", "Riska Julia", "Ary Tryjuniarti", "Hafizat Intan", "Veni Wijaya", "Dinda Aisyah"];
+    const employees = ["Dina Kharisma", "Aryani Tryjuniarti", "Hafizat Intan", "Adinda Aisyah", "Yudy Pandjaitan", "Riska Julia", "Fitri Rahmawati", "Veni Wijaya", "Victor Pasaribu"];
+	const employeeDivisions = {
+	  "Dina Kharisma": "legal",
+	  "Ary Tryjuniarti": "legal",
+	  "Hafizat Intan": "legal",
+	  "Dinda Aisyah": "legal",
+	  "Yudy Pandjaitan": "finance",
+	  "Riska Julia": "finance",
+	  "Fitri Rahmawati": "finance",
+	  "Veni Wijaya": "finance",
+	  "Victor Pasaribu": "it"
+	};
     let schedule = {};
     let selectedEmployee = null;
 
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+	
+	function getDivisionClass(name) {
+	  const legal = ["Dina Kharisma", "Aryani Tryjuniarti", "Hafizat Intan", "Adinda Aisyah"];
+	  const finance = ["Yudy Pandjaitan", "Riska Julia", "Fitri Rahmawati", "Veni Wijaya"];
+	  const it = ["Victor Pasaribu"];
 
-	 function createNamesColumn() {
+	  if (legal.includes(name)) return "legal";
+	  if (finance.includes(name)) return "finance";
+	  if (it.includes(name)) return "it";
+	  return "";
+	}
+
+	function createNamesColumn() {
 	  const namesColumn = document.getElementById("names-column");
 	  namesColumn.innerHTML = "";
 	  employees.forEach((employee) => {
 		const nameDiv = document.createElement("div");
 		nameDiv.classList.add("name");
 
-		// Pisah nama menjadi dua bagian
+		const divisionClass = getDivisionClass(employee);
+		if (divisionClass) {
+		  nameDiv.classList.add(divisionClass);
+		}
+
 		const nameParts = employee.split(" ");
 		if (nameParts.length > 1) {
 		  const firstLine = nameParts[0];
@@ -416,6 +485,11 @@
 		  schedule[day].forEach((employee) => {
 			const employeeDiv = document.createElement("div");
 			employeeDiv.classList.add("employee");
+
+		const division = employeeDivisions[employee.toString()];
+		if (division) {
+		  employeeDiv.classList.add(division);
+		}
 			employeeDiv.textContent = employee;
 			employeeDiv.innerHTML += `<span class="remove" onclick="removeEmployeeFromDay(event)">X</span>`;
 			dayDiv.appendChild(employeeDiv);
