@@ -425,8 +425,59 @@
     let schedule = {};
     let selectedEmployee = null;
 
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+    //const startOfWeek = new Date();
+    //startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+	
+	//const startOfWeek = new Date();
+	//const currentDay = startOfWeek.getDay(); // 0 (Minggu) - 6 (Sabtu)
+
+	//if (currentDay === 0) {
+	  // Jika hari Minggu, geser ke Senin minggu depan
+	  //startOfWeek.setDate(startOfWeek.getDate() + 1);
+	//} else {
+	  // Jika bukan Minggu, ambil Senin minggu ini
+	  //startOfWeek.setDate(startOfWeek.getDate() - currentDay + 1);
+	//}
+	
+	function getFormattedDate(date) {
+	  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+	}
+	
+	let startOfWeek = new Date(); // global
+
+	async function calculateStartOfWeek() {
+	  const today = new Date();
+	  const currentDay = today.getDay(); // 0 = Minggu
+	  let monday = new Date(today);
+
+	  if (currentDay === 0) {
+		// Hari Minggu
+		const thisWeekMonday = new Date(today);
+		thisWeekMonday.setDate(today.getDate() - 6);
+
+		const snapshot = await db.ref("logDownloadedForWeek").once("value");
+		const savedLogWeek = snapshot.val();
+
+		if (savedLogWeek === getFormattedDate(thisWeekMonday)) {
+		  // Jika sudah download log minggu ini, geser ke Senin depan
+		  monday.setDate(today.getDate() + 1);
+		} else {
+		  // Kalau belum, tetap minggu ini
+		  monday.setDate(today.getDate() - 6);
+		}
+	  } else {
+		// Hari biasa → Senin minggu ini
+		monday.setDate(today.getDate() - currentDay + 1);
+	  }
+
+	  startOfWeek = new Date(monday);
+	  createNamesColumn();
+	  await loadSchedule();
+	}
+
+	calculateStartOfWeek(); // ganti panggilan createNamesColumn dan loadSchedule dengan ini
+
+
 	
 	function getDivisionClass(name) {
 	  const legal = ["Dina Kharisma", "Aryani Tryjuniarti", "Hafizat Intan", "Adinda Aisyah"];
@@ -621,6 +672,8 @@
       });
 
       saveSchedule();
+	  // Tandai di Firebase bahwa log minggu ini sudah diunduh
+	  db.ref("logDownloadedForWeek").set(getFormattedDate(startOfWeek));
       loadSchedule();
     }
 
